@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="puzzle_bg">#0e1117</color>
+    <color name="puzzle_primary">#6ea8ff</color>
+    <color name="puzzle_primary_dark">#3c68b8</color>
+</resources>
