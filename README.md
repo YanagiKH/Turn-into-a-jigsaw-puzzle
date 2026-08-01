@@ -1,24 +1,42 @@
 # Turn into a Jigsaw Puzzle
 
-Electron desktop game that converts any image into a playable puzzle.
+Image-to-jigsaw puzzle game for desktop, web, and Android browsers.
 
-## Features
+## What is included
 
-- Load any image and convert it into a puzzle
-- Load and save project files
-- Classic jigsaw pieces or square tiles
-- Puzzle size from 3×3 to 12×12
-- Right-side tray with five random pieces and automatic refill
-- Board panning and zooming
+- Double-click launcher for desktop use
+- Electron packaging config for a one-click installer
+- PWA manifest and service worker for installable web / Android use
+- Responsive mobile-first layout
 - English / Traditional Chinese / Japanese UI
-- Saved completion records and best times
+- Image loading, project save/load, tray refill, zoom, pan, timer, and best records
 
-## Run
+## Run locally
 
 ```bash
 npm install
 npm start
 ```
+
+## Web preview
+
+```bash
+npm run web
+```
+
+Then open the address shown in the terminal.
+
+## Desktop build
+
+```bash
+npm run dist
+```
+
+That produces an installer in `dist/`.
+
+## Android / web deployment
+
+The app is now a PWA. Host the repository files on any static web host, open the site on Android, and use the browser install option to add it to the home screen.
 
 ## Project files
 
