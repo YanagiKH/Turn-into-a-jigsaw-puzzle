@@ -20,10 +20,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-fund --no-audit
 
       - name: Build Windows installer
         run: npx electron-builder --win nsis --x64 --publish never
@@ -47,7 +46,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
 
       - name: Install system packages
         run: |
@@ -55,7 +53,7 @@ jobs:
           sudo apt-get install -y libfuse2
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --no-fund --no-audit
 
       - name: Build Linux AppImage
         run: npx electron-builder --linux AppImage --publish never
