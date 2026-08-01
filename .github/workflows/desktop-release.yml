@@ -89,7 +89,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag="${GITHUB_REF_NAME}"
+          else
+            tag="desktop-${GITHUB_SHA::7}"
+          fi
           mapfile -t assets < <(find artifacts -type f \( -name '*.exe' -o -name '*.AppImage' \) | sort)
           if [ ${#assets[@]} -eq 0 ]; then
             echo "No release assets found"
