@@ -7,7 +7,7 @@
     "start": "electron .",
     "dist": "electron-builder",
     "dist:dir": "electron-builder --dir",
-    "web": "node -e \"require('http').createServer((req,res)=>{const fs=require('fs');const p=require('path');let u=req.url.split('?')[0];if(u==='/'||u==='')u='/index.html';const f=p.join(__dirname,u);fs.readFile(f,(e,d)=>{if(e){res.writeHead(404);res.end('Not found');return;}const ext=p.extname(f).toLowerCase();const m={'.html':'text/html;.charset=utf-8','.js':'application/javascript;.charset=utf-8','.css':'text/css;.charset=utf-8','.json':'application/manifest+json;.charset=utf-8','.svg':'image/svg+xml','.png':'image/png'}[ext]||'application/octet-stream';res.writeHead(200,{'Content-Type':m});res.end(d);});}).listen(4173,()=>console.log('http://localhost:4173'))\""
+    "web": "node web-server.js"
   },
   "keywords": [
     "electron",
@@ -38,6 +38,7 @@
       "styles.css",
       "mobile.css",
       "pwa.js",
+      "web-server.js",
       "manifest.webmanifest",
       "sw.js",
       "assets/**/*",
