@@ -70,6 +70,7 @@
       <aside class="panel right">
         <section class="section"><h2 data-i18n="tray">Piece tray</h2><div id="tray" class="tray"></div></section>
         <section class="section"><h2 data-i18n="records">Records</h2><div id="records" class="records"></div></section>
+        <section class="section"><div class="row"><h2 data-i18n="mods">Mods</h2><button id="refreshMods" class="ghost" data-i18n="refreshMods">Refresh</button></div><div id="modList" class="mods"></div></section>
       </aside>
     </main>
   </div>
@@ -80,6 +81,7 @@
     <div class="card wide">
       <h3 data-i18n="advancedSettings">Settings</h3>
       <div class="grid-form">
+        <label class="field"><span data-i18n="themeMode">Interface theme</span><select id="themeMode"></select></label>
         <label class="field"><span data-i18n="gifFps">GIF refresh rate</span><input id="gifFps" type="range" min="2" max="30" step="1" /></label>
         <label class="field"><span data-i18n="snapDistance">Snap distance</span><input id="snapDistance" type="range" min="0.35" max="1.00" step="0.05" /></label>
         <label class="field"><span data-i18n="maxZoom">Max zoom</span><input id="maxZoom" type="range" min="1.5" max="5" step="0.1" /></label>
