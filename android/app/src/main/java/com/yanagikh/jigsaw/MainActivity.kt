@@ -29,6 +29,6 @@ class MainActivity : AppCompatActivity() {
             displayZoomControls = false
         }
         webView.setBackgroundColor(0xFF0E1117.toInt())
-        webView.loadUrl("file:///android_asset/web/index.html")
+        webView.loadUrl("file:///android_asset/index.html")
     }
 }
