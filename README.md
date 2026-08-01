@@ -2,15 +2,10 @@
 
 Image-to-jigsaw puzzle game for desktop, web, and Android.
 
-## What is included
+一款適用於桌面版、網頁版及 Android 平台的圖片拼圖小遊戲 ~~浪費你的時間~~
 
-- Double-click launcher for desktop use
-- Electron packaging config for a one-click installer
-- PWA manifest and service worker for installable web / Android use
-- Native Android WebView wrapper with APK build workflow
-- Responsive mobile-first layout
-- English / Traditional Chinese / Japanese UI
-- Image loading, GIF support, project save/load, tray refill, zoom, pan, timer, settings, debug log, repair attempt, and best records
+簡單來說就是把圖片和gif分裂成拼圖再拼起來的小遊戲:)
+
 
 ## Run locally
 
@@ -25,8 +20,6 @@ npm start
 npm run web
 ```
 
-Then open the address shown in the terminal.
-
 ## Desktop build
 
 ```bash
@@ -39,12 +32,4 @@ That produces an installer in `dist/`.
 
 The app is a PWA. Host the repository files on any static web host, open the site on Android, and use the browser install option to add it to the home screen.
 
-## Project files
-
-Use **Save Project** to export the current image, settings, elapsed time, tray order, and board progress into a `.json` puzzle file.
-
-Use **Load Project** to continue from a previously saved file. If a saved file is damaged, the app can attempt automatic repair.
-
-## Records
-
-Records are stored locally in browser storage and keyed by image + size + style.
+此應用程式是一個PWA。將儲存庫檔案上傳至任何靜態網頁主機，在 Android 裝置上開啟該網站，並透過瀏覽器的安裝選項將其新增至主畫面，如果不想用電腦玩又不想裝apk可用這招
