@@ -1,20 +1,69 @@
 {
   "name": "turn-into-a-jigsaw-puzzle",
-  "version": "1.0.0",
-  "description": "Desktop jigsaw puzzle game that converts any image into a playable puzzle.",
+  "version": "1.1.0",
+  "description": "Desktop and web jigsaw puzzle game that converts any image into a playable puzzle.",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:dir": "electron-builder --dir",
+    "web": "node -e \"require('http').createServer((req,res)=>{const fs=require('fs');const p=require('path');let u=req.url.split('?')[0];if(u==='/'||u==='')u='/index.html';const f=p.join(__dirname,u);fs.readFile(f,(e,d)=>{if(e){res.writeHead(404);res.end('Not found');return;}const ext=p.extname(f).toLowerCase();const m={'.html':'text/html;.charset=utf-8','.js':'application/javascript;.charset=utf-8','.css':'text/css;.charset=utf-8','.json':'application/manifest+json;.charset=utf-8','.svg':'image/svg+xml','.png':'image/png'}[ext]||'application/octet-stream';res.writeHead(200,{'Content-Type':m});res.end(d);});}).listen(4173,()=>console.log('http://localhost:4173'))\""
   },
   "keywords": [
     "electron",
+    "pwa",
     "jigsaw",
     "puzzle",
-    "desktop-game"
+    "desktop-game",
+    "android",
+    "web"
   ],
   "author": "YanagiKH",
   "license": "MIT",
   "dependencies": {
     "electron": "^31.0.0"
+  },
+  "devDependencies": {
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.yanagikh.turnintoajigsawpuzzle",
+    "productName": "Turn into a Jigsaw Puzzle",
+    "asar": true,
+    "files": [
+      "index.html",
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "styles.css",
+      "mobile.css",
+      "pwa.js",
+      "manifest.webmanifest",
+      "sw.js",
+      "assets/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
+    "linux": {
+      "target": ["AppImage"]
+    }
   }
 }
