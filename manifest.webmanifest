@@ -1,0 +1,20 @@
+{
+  "name": "Turn into a Jigsaw Puzzle",
+  "short_name": "Jigsaw Puzzle",
+  "description": "Load any image and turn it into a playable jigsaw puzzle.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1117",
+  "theme_color": "#0e1117",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
