@@ -35,10 +35,6 @@ npm run dist
 
 That produces an installer in `dist/`.
 
-## Android APK
-
-The repository includes an Android Studio / Gradle project in `android/` and a GitHub Actions workflow in `.github/workflows/android-apk.yml` that builds a release APK and uploads it as an artifact. Trigger the workflow or push a version tag to produce the APK.
-
 ## Web / Android deployment
 
 The app is a PWA. Host the repository files on any static web host, open the site on Android, and use the browser install option to add it to the home screen.
