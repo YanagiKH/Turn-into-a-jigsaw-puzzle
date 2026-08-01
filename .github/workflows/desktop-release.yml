@@ -86,6 +86,7 @@ jobs:
       - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
             tag="${GITHUB_REF_NAME}"
@@ -97,8 +98,8 @@ jobs:
             echo "No release assets found"
             exit 1
           fi
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "${assets[@]}" --clobber
+          if gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
+            gh release upload "$tag" "${assets[@]}" --repo "$GH_REPO" --clobber
           else
-            gh release create "$tag" "${assets[@]}" --title "$tag" --notes "Desktop builds for Windows and Linux"
+            gh release create "$tag" "${assets[@]}" --repo "$GH_REPO" --title "$tag" --notes "Desktop builds for Windows and Linux"
           fi
