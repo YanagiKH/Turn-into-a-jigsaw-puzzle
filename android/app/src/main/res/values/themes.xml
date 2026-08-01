@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.TurnIntoJigsawPuzzle" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/puzzle_bg</item>
+        <item name="android:statusBarColor">@color/puzzle_bg</item>
+        <item name="android:navigationBarColor">@color/puzzle_bg</item>
+        <item name="colorPrimary">@color/puzzle_primary</item>
+        <item name="colorPrimaryVariant">@color/puzzle_primary_dark</item>
+        <item name="colorOnPrimary">#09111c</item>
+    </style>
+</resources>
