@@ -1,0 +1,8 @@
+{
+  "id": "aurora-theme",
+  "name": "Aurora Theme Pack",
+  "language": "javascript",
+  "type": "runtime",
+  "entry": "index.js",
+  "description": "Adds an aurora theme and logs puzzle events."
+}
