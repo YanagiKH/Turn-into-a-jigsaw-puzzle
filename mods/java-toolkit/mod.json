@@ -1,0 +1,8 @@
+{
+  "id": "java-toolkit",
+  "name": "Java Toolkit Pack",
+  "language": "java",
+  "type": "source",
+  "entry": "Main.java",
+  "description": "Source pack template for Java-based extensions."
+}
