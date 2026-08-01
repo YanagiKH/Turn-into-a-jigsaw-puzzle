@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Turn into a Jigsaw Puzzle</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="title" data-i18n="appTitle">Turn into a Jigsaw Puzzle</div>
+        <div class="subtitle" data-i18n="appSubtitle">Load any image, split it, and play instantly.</div>
+      </div>
+      <div class="top-actions">
+        <label class="field compact"><span data-i18n="language">Language</span>
+          <select id="lang"><option value="en">English</option><option value="zh">繁體中文</option><option value="ja">日本語</option></select>
+        </label>
+        <button id="saveProject" class="ghost" data-i18n="saveProject">Save Project</button>
+        <button id="loadProject" class="ghost" data-i18n="loadProject">Load Project</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel left">
+        <section class="section">
+          <h2 data-i18n="source">Source</h2>
+          <div class="row">
+            <button id="pickImage" class="primary" data-i18n="loadImage">Load Image</button>
+            <button id="clear" class="ghost" data-i18n="clear">Clear</button>
+          </div>
+          <input id="imageInput" type="file" accept="image/*" hidden />
+          <div class="preview"><img id="previewImg" alt="" /><div id="previewHint" class="hint" data-i18n="noImage">No image loaded yet.</div></div>
+          <div class="meta"><div><span data-i18n="file">File</span>: <strong id="fileName">-</strong></div><div><span data-i18n="dimensions">Dimensions</span>: <strong id="fileDim">-</strong></div></div>
+        </section>
+        <section class="section">
+          <h2 data-i18n="setup">Setup</h2>
+          <label class="field"><span data-i18n="style">Puzzle style</span><select id="style"><option value="jigsaw" data-i18n="styleJigsaw">Classic jigsaw</option><option value="square" data-i18n="styleSquare">Square tiles</option></select></label>
+          <label class="field"><span data-i18n="piecesPerSide">Pieces per side</span><select id="size"><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option><option>10</option><option>12</option></select></label>
+          <div class="row"><button id="newGame" class="primary" data-i18n="newGame">Create Puzzle</button><button id="resume" class="ghost" data-i18n="resume">Resume</button></div>
+        </section>
+        <section class="section">
+          <h2 data-i18n="status">Status</h2>
+          <div class="status"><div><span data-i18n="timer">Time</span>: <strong id="time">00:00.000</strong></div><div><span data-i18n="progress">Progress</span>: <strong id="progress">0 / 0</strong></div><div><span data-i18n="best">Best</span>: <strong id="best">-</strong></div></div>
+          <div id="status" class="hint" data-i18n="idleState">Load an image to start.</div>
+        </section>
+      </aside>
+
+      <section class="panel center">
+        <div class="bar"><div class="row"><button id="fit" class="ghost" data-i18n="fit">Fit View</button><button id="reset" class="ghost" data-i18n="resetView">Reset View</button><button id="zoomOut" class="ghost">−</button><button id="zoomIn" class="ghost">+</button></div><div class="hint" data-i18n="boardHint">Drag pieces from the right tray. Pan the board by dragging empty space. Zoom with buttons or mouse wheel.</div></div>
+        <div id="viewport" class="viewport"><div id="stage" class="stage"><div id="slots" class="slots"></div><div id="placed" class="placed"></div></div></div>
+      </section>
+
+      <aside class="panel right">
+        <section class="section"><h2 data-i18n="tray">Piece tray</h2><div id="tray" class="tray"></div></section>
+        <section class="section"><h2 data-i18n="records">Records</h2><div id="records" class="records"></div></section>
+      </aside>
+    </main>
+  </div>
+  <div id="modal" class="modal hidden"><div class="card"><h3 data-i18n="completeTitle">Puzzle completed</h3><p id="finishText"></p><button id="closeModal" class="primary" data-i18n="continue">Continue</button></div></div>
+  <script src="renderer.js"></script>
+</body>
+</html>
