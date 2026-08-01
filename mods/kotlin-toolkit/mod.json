@@ -1,0 +1,8 @@
+{
+  "id": "kotlin-toolkit",
+  "name": "Kotlin Toolkit Pack",
+  "language": "kotlin",
+  "type": "source",
+  "entry": "Main.kt",
+  "description": "Source pack template for Kotlin-based extensions."
+}
