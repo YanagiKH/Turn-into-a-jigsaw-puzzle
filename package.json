@@ -1,0 +1,20 @@
+{
+  "name": "turn-into-a-jigsaw-puzzle",
+  "version": "1.0.0",
+  "description": "Desktop jigsaw puzzle game that converts any image into a playable puzzle.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "electron",
+    "jigsaw",
+    "puzzle",
+    "desktop-game"
+  ],
+  "author": "YanagiKH",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^31.0.0"
+  }
+}
