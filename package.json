@@ -1,13 +1,14 @@
 {
   "name": "turn-into-a-jigsaw-puzzle",
-  "version": "1.1.0",
-  "description": "Desktop and web jigsaw puzzle game that converts any image into a playable puzzle.",
+  "version": "1.2.0",
+  "description": "Desktop, web, and Android jigsaw puzzle game that converts any image into a playable puzzle.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder",
     "dist:dir": "electron-builder --dir",
-    "web": "node web-server.js"
+    "web": "node web-server.js",
+    "android:build": "echo Use the android/ Gradle project or GitHub Actions workflow to build the APK"
   },
   "keywords": [
     "electron",
@@ -16,7 +17,8 @@
     "puzzle",
     "desktop-game",
     "android",
-    "web"
+    "web",
+    "apk"
   ],
   "author": "YanagiKH",
   "license": "MIT",
