@@ -23,8 +23,14 @@
       </div>
       <div class="top-actions">
         <label class="field compact"><span data-i18n="language">Language</span>
-          <select id="lang"><option value="en">English</option><option value="zh">繁體中文</option><option value="ja">日本語</option></select>
+          <select id="lang">
+            <option value="en">English</option>
+            <option value="zh">繁體中文</option>
+            <option value="ja">日本語</option>
+          </select>
         </label>
+        <button id="settingsBtn" class="ghost" data-i18n="advancedSettings">Settings</button>
+        <button id="debugBtn" class="ghost" data-i18n="debugLog">Debug Log</button>
         <button id="saveProject" class="ghost" data-i18n="saveProject">Save Project</button>
         <button id="loadProject" class="ghost" data-i18n="loadProject">Load Project</button>
       </div>
@@ -38,7 +44,8 @@
             <button id="pickImage" class="primary" data-i18n="loadImage">Load Image</button>
             <button id="clear" class="ghost" data-i18n="clear">Clear</button>
           </div>
-          <input id="imageInput" type="file" accept="image/*" hidden />
+          <input id="imageInput" type="file" accept="image/*,.gif" hidden />
+          <input id="projectInput" type="file" accept=".json,.jigsaw" hidden />
           <div class="preview"><img id="previewImg" alt="" /><div id="previewHint" class="hint" data-i18n="noImage">No image loaded yet.</div></div>
           <div class="meta"><div><span data-i18n="file">File</span>: <strong id="fileName">-</strong></div><div><span data-i18n="dimensions">Dimensions</span>: <strong id="fileDim">-</strong></div></div>
         </section>
@@ -66,7 +73,29 @@
       </aside>
     </main>
   </div>
+
   <div id="modal" class="modal hidden"><div class="card"><h3 data-i18n="completeTitle">Puzzle completed</h3><p id="finishText"></p><button id="closeModal" class="primary" data-i18n="continue">Continue</button></div></div>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="card wide">
+      <h3 data-i18n="advancedSettings">Settings</h3>
+      <div class="grid-form">
+        <label class="field"><span data-i18n="gifFps">GIF refresh rate</span><input id="gifFps" type="range" min="2" max="30" step="1" /></label>
+        <label class="field"><span data-i18n="snapDistance">Snap distance</span><input id="snapDistance" type="range" min="0.35" max="1.00" step="0.05" /></label>
+        <label class="field"><span data-i18n="maxZoom">Max zoom</span><input id="maxZoom" type="range" min="1.5" max="5" step="0.1" /></label>
+        <label class="field"><span data-i18n="debugMode">Debug mode</span><select id="debugMode"><option value="off">Off</option><option value="on">On</option></select></label>
+        <label class="field"><span data-i18n="debugVerbose">Verbose logs</span><select id="debugVerbose"><option value="off">Off</option><option value="on">On</option></select></label>
+        <label class="field"><span data-i18n="repairMode">Repair project files</span><select id="repairMode"><option value="on">On</option><option value="off">Off</option></select></label>
+      </div>
+      <div class="row footer-actions"><button id="settingsSave" class="primary" data-i18n="save">Save</button><button id="settingsCancel" class="ghost" data-i18n="cancel">Cancel</button></div>
+    </div>
+  </div>
+
+  <div id="debugPanel" class="debug-panel hidden">
+    <div class="debug-head"><strong data-i18n="debugLog">Debug Log</strong><div class="row"><button id="copyLogs" class="ghost" data-i18n="copy">Copy</button><button id="clearLogs" class="ghost" data-i18n="clearLogs">Clear</button><button id="closeDebug" class="ghost" data-i18n="close">Close</button></div></div>
+    <pre id="debugOutput"></pre>
+  </div>
+
   <script src="renderer.js"></script>
   <script src="pwa.js"></script>
 </body>
