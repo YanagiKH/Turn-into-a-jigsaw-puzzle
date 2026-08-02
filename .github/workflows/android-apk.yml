@@ -25,36 +25,124 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install platform tools
+      - name: Install Android build tools
         run: |
           sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-          yes | sdkmanager --licenses
+          yes | sdkmanager --licenses >/dev/null
 
       - name: Install Gradle
         run: |
-          curl -L https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
-          unzip -q gradle.zip -d $HOME/gradle
-          echo "$HOME/gradle/gradle-8.10.2/bin" >> $GITHUB_PATH
+          curl --fail --location --retry 3 https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o gradle.zip
+          unzip -q gradle.zip -d "$HOME/gradle"
+          echo "$HOME/gradle/gradle-8.10.2/bin" >> "$GITHUB_PATH"
+
+      - name: Set Android version
+        run: |
+          version_name=$(python3 -c "import json; print(json.load(open('package.json', encoding='utf-8'))['version'])")
+          echo "ANDROID_VERSION_NAME=$version_name" >> "$GITHUB_ENV"
+          echo "ANDROID_VERSION_CODE=$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+
+      - name: Prepare APK signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          SECRET_STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SECRET_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          SECRET_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$SECRET_STORE_PASSWORD" ] && [ -n "$SECRET_KEY_ALIAS" ] && [ -n "$SECRET_KEY_PASSWORD" ]; then
+            echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/release-keystore.jks"
+            store_password="$SECRET_STORE_PASSWORD"
+            key_alias="$SECRET_KEY_ALIAS"
+            key_password="$SECRET_KEY_PASSWORD"
+            echo "Using repository release signing key"
+          else
+            store_password="jigsaw-ci-store"
+            key_alias="jigsaw-ci-release"
+            key_password="jigsaw-ci-key"
+            keytool -genkeypair \
+              -keystore "$RUNNER_TEMP/release-keystore.jks" \
+              -storepass "$store_password" \
+              -keypass "$key_password" \
+              -alias "$key_alias" \
+              -keyalg RSA \
+              -keysize 4096 \
+              -validity 10000 \
+              -dname "CN=Turn into a Jigsaw Puzzle, OU=GitHub Actions, O=YanagiKH, L=Taipei, C=TW"
+            echo "Using generated fallback signing key. Configure Android signing secrets for upgrade-compatible releases."
+          fi
+          echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/release-keystore.jks" >> "$GITHUB_ENV"
+          echo "ANDROID_KEYSTORE_PASSWORD=$store_password" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_ALIAS=$key_alias" >> "$GITHUB_ENV"
+          echo "ANDROID_KEY_PASSWORD=$key_password" >> "$GITHUB_ENV"
 
       - name: Build release APK
-        run: |
-          gradle -p android assembleRelease
+        run: gradle -p android clean assembleRelease --stacktrace
 
-      - name: Upload APK artifact
+      - name: Align, sign, and verify APK
+        run: |
+          build_tools="$ANDROID_SDK_ROOT/build-tools/34.0.0"
+          unsigned_apk=$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)
+          if [ -z "$unsigned_apk" ]; then
+            echo "Release APK was not produced"
+            exit 1
+          fi
+
+          mkdir -p release-output
+          aligned_apk="$RUNNER_TEMP/jigsaw-aligned.apk"
+          final_apk="release-output/Turn-into-a-Jigsaw-Puzzle-${ANDROID_VERSION_NAME}-Android.apk"
+
+          "$build_tools/zipalign" -p -f 4 "$unsigned_apk" "$aligned_apk"
+          "$build_tools/apksigner" sign \
+            --ks "$ANDROID_KEYSTORE_FILE" \
+            --ks-key-alias "$ANDROID_KEY_ALIAS" \
+            --ks-pass "pass:$ANDROID_KEYSTORE_PASSWORD" \
+            --key-pass "pass:$ANDROID_KEY_PASSWORD" \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out "$final_apk" \
+            "$aligned_apk"
+
+          "$build_tools/apksigner" verify --verbose --print-certs "$final_apk"
+          unzip -tq "$final_apk"
+          "$build_tools/aapt" dump badging "$final_apk" | tee release-output/apk-badging.txt
+
+          for required in \
+            assets/index.html \
+            assets/renderer.js \
+            assets/platform-bridge.js \
+            assets/challenge-mode.js \
+            assets/challenge.css \
+            assets/mods/index.json \
+            assets/mods/aurora-theme/index.js; do
+            unzip -l "$final_apk" | grep -F "$required" >/dev/null
+          done
+
+          sha256sum "$final_apk" > "$final_apk.sha256"
+
+      - name: Upload verified APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: turn-into-a-jigsaw-puzzle-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          name: turn-into-a-jigsaw-puzzle-android
+          path: |
+            release-output/*.apk
+            release-output/*.apk.sha256
+            release-output/apk-badging.txt
+          if-no-files-found: error
 
-      - name: Publish release asset
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
-          apk_path=$(ls android/app/build/outputs/apk/release/*.apk | head -n 1)
-          tag_name=${GITHUB_REF_NAME}
-          if gh release view "$tag_name" >/dev/null 2>&1; then
-            gh release upload "$tag_name" "$apk_path" --clobber
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            tag="$GITHUB_REF_NAME"
           else
-            gh release create "$tag_name" "$apk_path" --title "$tag_name" --notes "Android APK build"
+            tag="android-${GITHUB_SHA::7}"
+          fi
+          mapfile -t assets < <(find release-output -maxdepth 1 -type f \( -name '*.apk' -o -name '*.apk.sha256' \) | sort)
+          if gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
+            gh release upload "$tag" "${assets[@]}" --repo "$GH_REPO" --clobber
+          else
+            gh release create "$tag" "${assets[@]}" --repo "$GH_REPO" --title "$tag" --notes "Verified signed Android APK"
           fi
