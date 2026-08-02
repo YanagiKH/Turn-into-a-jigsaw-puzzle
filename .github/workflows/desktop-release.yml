@@ -25,7 +25,39 @@ jobs:
         run: npm install --no-fund --no-audit
 
       - name: Build Windows installer
-        run: npx electron-builder --win nsis --x64 --publish never
+        run: npm run dist:win
+
+      - name: Verify Windows installer and packaged features
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path dist -Filter '*.exe' | Sort-Object Length -Descending | Select-Object -First 1
+          if ($null -eq $installer) { throw 'Windows installer was not produced' }
+          if ($installer.Length -lt 5MB) { throw "Windows installer is unexpectedly small: $($installer.Length) bytes" }
+
+          $sevenZip = "$env:ProgramFiles\7-Zip\7z.exe"
+          if (Test-Path $sevenZip) {
+            & $sevenZip t $installer.FullName | Out-Host
+            if ($LASTEXITCODE -ne 0) { throw 'Windows installer archive verification failed' }
+          }
+
+          $asarPath = 'dist/win-unpacked/resources/app.asar'
+          if (-not (Test-Path $asarPath)) { throw 'Windows app.asar was not produced' }
+          $asarList = (& npx asar list $asarPath) -join "`n"
+          $required = @(
+            'index.html',
+            'renderer.js',
+            'platform-bridge.js',
+            'challenge-mode.js',
+            'challenge.css',
+            'mods/aurora-theme/index.js',
+            'mods/index.json'
+          )
+          foreach ($item in $required) {
+            if ($asarList -notmatch [regex]::Escape($item)) { throw "Missing packaged feature: $item" }
+          }
+
+          $hash = (Get-FileHash -Algorithm SHA256 $installer.FullName).Hash.ToLower()
+          "$hash  $($installer.Name)" | Set-Content -Encoding ascii "$($installer.FullName).sha256"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
@@ -33,7 +65,7 @@ jobs:
           name: desktop-windows
           path: |
             dist/*.exe
-            dist/*.yml
+            dist/*.exe.sha256
           if-no-files-found: error
 
   build_linux:
@@ -50,13 +82,39 @@ jobs:
       - name: Install system packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfuse2
+          sudo apt-get install -y libfuse2 file
 
       - name: Install dependencies
         run: npm install --no-fund --no-audit
 
       - name: Build Linux AppImage
-        run: npx electron-builder --linux AppImage --publish never
+        run: npm run dist:linux
+
+      - name: Verify Linux AppImage and packaged features
+        run: |
+          appimage=$(find dist -maxdepth 1 -type f -name '*.AppImage' -print -quit)
+          test -n "$appimage"
+          test -s "$appimage"
+          chmod +x "$appimage"
+          file "$appimage" | grep -E 'ELF|executable'
+
+          rm -rf squashfs-root
+          "$appimage" --appimage-extract >/dev/null
+          asar_path='squashfs-root/resources/app.asar'
+          test -s "$asar_path"
+          npx asar list "$asar_path" > asar-list.txt
+          for required in \
+            index.html \
+            renderer.js \
+            platform-bridge.js \
+            challenge-mode.js \
+            challenge.css \
+            mods/aurora-theme/index.js \
+            mods/index.json; do
+            grep -F "$required" asar-list.txt >/dev/null
+          done
+
+          sha256sum "$appimage" > "$appimage.sha256"
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -64,7 +122,7 @@ jobs:
           name: desktop-linux
           path: |
             dist/*.AppImage
-            dist/*.yml
+            dist/*.AppImage.sha256
           if-no-files-found: error
 
   release:
@@ -93,7 +151,7 @@ jobs:
           else
             tag="desktop-${GITHUB_SHA::7}"
           fi
-          mapfile -t assets < <(find artifacts -type f \( -name '*.exe' -o -name '*.AppImage' \) | sort)
+          mapfile -t assets < <(find artifacts -type f \( -name '*.exe' -o -name '*.AppImage' -o -name '*.sha256' \) | sort)
           if [ ${#assets[@]} -eq 0 ]; then
             echo "No release assets found"
             exit 1
@@ -101,5 +159,5 @@ jobs:
           if gh release view "$tag" --repo "$GH_REPO" >/dev/null 2>&1; then
             gh release upload "$tag" "${assets[@]}" --repo "$GH_REPO" --clobber
           else
-            gh release create "$tag" "${assets[@]}" --repo "$GH_REPO" --title "$tag" --notes "Desktop builds for Windows and Linux"
+            gh release create "$tag" "${assets[@]}" --repo "$GH_REPO" --title "$tag" --notes "Verified desktop builds for Windows and Linux"
           fi
