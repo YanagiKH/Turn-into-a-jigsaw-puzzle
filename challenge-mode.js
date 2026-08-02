@@ -178,6 +178,8 @@
     resetChallenge();
     saveConfig();
     if (mode.value !== 'on') return;
+    const puzzle = parseProgress();
+    if (puzzle.total <= 0) return;
     durationMs = readDuration();
     deadline = Date.now() + durationMs;
     active = true;
