@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-eval'; connect-src 'self';" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0e1117" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -13,6 +13,7 @@
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="mobile.css" />
+  <link rel="stylesheet" href="challenge.css" />
 </head>
 <body>
   <div class="app">
@@ -53,11 +54,23 @@
           <h2 data-i18n="setup">Setup</h2>
           <label class="field"><span data-i18n="style">Puzzle style</span><select id="style"><option value="jigsaw" data-i18n="styleJigsaw">Classic jigsaw</option><option value="square" data-i18n="styleSquare">Square tiles</option></select></label>
           <label class="field"><span data-i18n="piecesPerSide">Pieces per side</span><select id="size"><option>3</option><option selected>4</option><option>5</option><option>6</option><option>8</option><option>10</option><option>12</option></select></label>
+          <label class="field"><span data-challenge-i18n="timedChallenge">Timed challenge</span>
+            <select id="challengeMode"><option value="off">Off</option><option value="on">On</option></select>
+          </label>
+          <div id="challengeTimeFields" class="challenge-time-fields hidden">
+            <label class="field"><span data-challenge-i18n="minutes">Minutes</span><input id="challengeMinutes" type="number" min="0" max="180" step="1" value="10" inputmode="numeric" /></label>
+            <label class="field"><span data-challenge-i18n="seconds">Seconds</span><input id="challengeSeconds" type="number" min="0" max="59" step="1" value="0" inputmode="numeric" /></label>
+          </div>
           <div class="row"><button id="newGame" class="primary" data-i18n="newGame">Create Puzzle</button><button id="resume" class="ghost" data-i18n="resume">Resume</button></div>
         </section>
         <section class="section">
           <h2 data-i18n="status">Status</h2>
-          <div class="status"><div><span data-i18n="timer">Time</span>: <strong id="time">00:00.000</strong></div><div><span data-i18n="progress">Progress</span>: <strong id="progress">0 / 0</strong></div><div><span data-i18n="best">Best</span>: <strong id="best">-</strong></div></div>
+          <div class="status">
+            <div><span data-i18n="timer">Time</span>: <strong id="time">00:00.000</strong></div>
+            <div id="challengeStatusRow" class="hidden"><span data-challenge-i18n="remaining">Remaining</span>: <strong id="challengeRemaining">00:00</strong><div id="challengeResult" class="challenge-result"></div></div>
+            <div><span data-i18n="progress">Progress</span>: <strong id="progress">0 / 0</strong></div>
+            <div><span data-i18n="best">Best</span>: <strong id="best">-</strong></div>
+          </div>
           <div id="status" class="hint" data-i18n="idleState">Load an image to start.</div>
         </section>
       </aside>
@@ -76,6 +89,14 @@
   </div>
 
   <div id="modal" class="modal hidden"><div class="card"><h3 data-i18n="completeTitle">Puzzle completed</h3><p id="finishText"></p><button id="closeModal" class="primary" data-i18n="continue">Continue</button></div></div>
+
+  <div id="timeoutModal" class="modal hidden">
+    <div class="card">
+      <h3 data-challenge-i18n="timeoutTitle">Time is up</h3>
+      <p id="timeoutText" data-challenge-i18n="timeoutBody">The time limit expired before the puzzle was completed.</p>
+      <button id="closeTimeout" class="primary" data-challenge-i18n="close">Close</button>
+    </div>
+  </div>
 
   <div id="settingsModal" class="modal hidden">
     <div class="card wide">
@@ -98,7 +119,9 @@
     <pre id="debugOutput"></pre>
   </div>
 
+  <script src="platform-bridge.js"></script>
   <script src="renderer.js"></script>
+  <script src="challenge-mode.js"></script>
   <script src="pwa.js"></script>
 </body>
 </html>
