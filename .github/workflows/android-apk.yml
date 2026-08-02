@@ -58,7 +58,7 @@ jobs:
           else
             store_password="jigsaw-ci-store"
             key_alias="jigsaw-ci-release"
-            key_password="jigsaw-ci-key"
+            key_password="$store_password"
             keytool -genkeypair \
               -keystore "$RUNNER_TEMP/release-keystore.jks" \
               -storepass "$store_password" \
