@@ -24,6 +24,24 @@ jobs:
       - name: Install dependencies
         run: npm install --no-fund --no-audit
 
+      - name: Verify required source files
+        shell: pwsh
+        run: |
+          $required = @(
+            'index.html',
+            'renderer.js',
+            'platform-bridge.js',
+            'challenge-mode.js',
+            'challenge.css',
+            'mods/aurora-theme/index.js',
+            'mods/index.json'
+          )
+          foreach ($item in $required) {
+            if (-not (Test-Path -LiteralPath $item -PathType Leaf)) {
+              throw "Missing required source file: $item"
+            }
+          }
+
       - name: Build Windows installer
         run: npm run dist:win
 
@@ -41,8 +59,19 @@ jobs:
           }
 
           $asarPath = 'dist/win-unpacked/resources/app.asar'
-          if (-not (Test-Path $asarPath)) { throw 'Windows app.asar was not produced' }
-          $asarList = (& npx asar list $asarPath) -join "`n"
+          if (-not (Test-Path -LiteralPath $asarPath -PathType Leaf)) {
+            throw 'Windows app.asar was not produced'
+          }
+
+          $asarOutput = & npx --no-install asar list $asarPath
+          if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect Windows app.asar' }
+
+          $asarEntries = @($asarOutput | ForEach-Object {
+            $normalized = ($_ -replace '\\', '/')
+            $normalized = ($normalized -replace '^/+', '')
+            $normalized.Trim()
+          })
+
           $required = @(
             'index.html',
             'renderer.js',
@@ -53,7 +82,11 @@ jobs:
             'mods/index.json'
           )
           foreach ($item in $required) {
-            if ($asarList -notmatch [regex]::Escape($item)) { throw "Missing packaged feature: $item" }
+            if ($asarEntries -notcontains $item) {
+              Write-Host 'Packaged ASAR entries:'
+              $asarEntries | Sort-Object | Out-Host
+              throw "Missing packaged feature: $item"
+            }
           }
 
           $hash = (Get-FileHash -Algorithm SHA256 $installer.FullName).Hash.ToLower()
@@ -87,6 +120,19 @@ jobs:
       - name: Install dependencies
         run: npm install --no-fund --no-audit
 
+      - name: Verify required source files
+        run: |
+          for required in \
+            index.html \
+            renderer.js \
+            platform-bridge.js \
+            challenge-mode.js \
+            challenge.css \
+            mods/aurora-theme/index.js \
+            mods/index.json; do
+            test -f "$required"
+          done
+
       - name: Build Linux AppImage
         run: npm run dist:linux
 
@@ -102,7 +148,12 @@ jobs:
           "$appimage" --appimage-extract >/dev/null
           asar_path='squashfs-root/resources/app.asar'
           test -s "$asar_path"
-          npx asar list "$asar_path" > asar-list.txt
+
+          npx --no-install asar list "$asar_path" \
+            | sed -e 's#\\#/#g' -e 's#^/*##' \
+            | sed '/^[[:space:]]*$/d' \
+            > asar-list.txt
+
           for required in \
             index.html \
             renderer.js \
@@ -111,7 +162,11 @@ jobs:
             challenge.css \
             mods/aurora-theme/index.js \
             mods/index.json; do
-            grep -F "$required" asar-list.txt >/dev/null
+            if ! grep -Fqx "$required" asar-list.txt; then
+              echo "Missing packaged feature: $required"
+              sort asar-list.txt
+              exit 1
+            fi
           done
 
           sha256sum "$appimage" > "$appimage.sha256"
