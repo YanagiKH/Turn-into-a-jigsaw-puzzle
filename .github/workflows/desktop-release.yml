@@ -41,6 +41,9 @@ jobs:
               throw "Missing required source file: $item"
             }
           }
+          if (-not (Test-Path -LiteralPath 'node_modules/.bin/asar.cmd' -PathType Leaf)) {
+            throw 'Local ASAR CLI was not installed'
+          }
 
       - name: Build Windows installer
         run: npm run dist:win
@@ -63,7 +66,8 @@ jobs:
             throw 'Windows app.asar was not produced'
           }
 
-          $asarOutput = & npx --no-install asar list $asarPath
+          $asarCli = (Resolve-Path 'node_modules/.bin/asar.cmd').Path
+          $asarOutput = & $asarCli list $asarPath
           if ($LASTEXITCODE -ne 0) { throw 'Unable to inspect Windows app.asar' }
 
           $asarEntries = @($asarOutput | ForEach-Object {
@@ -132,6 +136,7 @@ jobs:
             mods/index.json; do
             test -f "$required"
           done
+          test -x node_modules/.bin/asar
 
       - name: Build Linux AppImage
         run: npm run dist:linux
@@ -149,7 +154,7 @@ jobs:
           asar_path='squashfs-root/resources/app.asar'
           test -s "$asar_path"
 
-          npx --no-install asar list "$asar_path" \
+          node_modules/.bin/asar list "$asar_path" \
             | sed -e 's#\\#/#g' -e 's#^/*##' \
             | sed '/^[[:space:]]*$/d' \
             > asar-list.txt
