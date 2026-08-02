@@ -1,0 +1,29 @@
+[
+  {
+    "id": "aurora-theme",
+    "name": "Aurora Theme Pack",
+    "description": "Adds an aurora theme and logs puzzle events.",
+    "language": "javascript",
+    "type": "runtime",
+    "entry": "mods/aurora-theme/index.js",
+    "source": "bundled"
+  },
+  {
+    "id": "java-toolkit",
+    "name": "Java Toolkit Pack",
+    "description": "Source pack template for Java-based extensions.",
+    "language": "java",
+    "type": "source",
+    "entry": "mods/java-toolkit/Main.java",
+    "source": "bundled"
+  },
+  {
+    "id": "kotlin-toolkit",
+    "name": "Kotlin Toolkit Pack",
+    "description": "Source pack template for Kotlin-based extensions.",
+    "language": "kotlin",
+    "type": "source",
+    "entry": "mods/kotlin-toolkit/Main.kt",
+    "source": "bundled"
+  }
+]
